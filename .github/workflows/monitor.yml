@@ -21,11 +21,13 @@ jobs:
       - name: Update Gist
         run: |
           TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          CONTENT="{\"status\": \"${{ env.status }}\", \"timestamp\": \"$TS\"}"
-          echo "$CONTENT" > result.json
+          STATUS="${{ env.status }}"
+          CONTENT="{\"status\":\"$STATUS\",\"timestamp\":\"$TS\"}"
+
+          echo "Updating gist with: $CONTENT"
 
           curl -s -X PATCH \
             -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
-            https://api.github.com/gists/8dfeb43ad3f8828b441a6759861b8fbf \
-            -d "{\"files\": {\"service-status.json\": {\"content\": \"$CONTENT\"}}}"
+            https://api.github.com/gists/<gist-id> \
+            -d "$(jq -n --arg c "$CONTENT" '{files: {"service-status.json": {content: $c}}}')"
