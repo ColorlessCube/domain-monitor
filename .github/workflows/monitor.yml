@@ -1,0 +1,31 @@
+name: Monitor Service
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # 每 5 分钟跑一次
+  workflow_dispatch:         # 可手动触发
+
+jobs:
+  check-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check service availability
+        run: |
+          URL="http://ialex.site:3244/"   # 你要检测的服务
+          if curl -6 -fsS --max-time 10 "$URL" > /dev/null; then
+            echo "status=ok" >> $GITHUB_ENV
+          else
+            echo "status=fail" >> $GITHUB_ENV
+          fi
+
+      - name: Update Gist
+        run: |
+          TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          CONTENT="{\"status\": \"${{ env.status }}\", \"timestamp\": \"$TS\"}"
+          echo "$CONTENT" > result.json
+
+          curl -s -X PATCH \
+            -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/gists/8dfeb43ad3f8828b441a6759861b8fbf \
+            -d "{\"files\": {\"service-status.json\": {\"content\": \"$CONTENT\"}}}"
