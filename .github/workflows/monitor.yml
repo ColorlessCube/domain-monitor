@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Check service availability
         run: |
-          URL="http://ialex.site:3244/"   # 你要检测的服务
+          URL="http://ialex.site:8096/"   # 你要检测的服务
           if curl -6 -fsS --max-time 10 "$URL" > /dev/null; then
             echo "status=ok" >> $GITHUB_ENV
           else
