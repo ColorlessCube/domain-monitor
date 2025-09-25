@@ -9,6 +9,12 @@ jobs:
   check-service:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug connectivity  
+        run: |
+          dig aaaa ialex.site || true
+          ping6 -c 4 ialex.site || true
+          curl -6 -v http://ialex.site:8096/ || true
+
       - name: Check service availability
         run: |
           URL="http://ialex.site:8096/"   # 你要检测的服务
